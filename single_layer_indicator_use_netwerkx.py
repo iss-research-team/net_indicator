@@ -1,12 +1,25 @@
+import math
+
 import networkx as nx
 
+'''
+现有指标
+constraint，effective_size，efficiency，clustering_coefficient，degree_centrality，between_centrality，closeness_centrality，eigenvector_centrality
+degree_centralization，betweenness_centralization，closeness_centralization, pagerank, grade_degree, ego_network_size
+density，clustering_global
+modularity，get_cluster_neighbor，cluster_degree，cluster_mediation
+'''
 
-# 单个节点约束度,返回字典
+def degree(graph, weight=False):
+    if weight:
+        return nx.degree(graph, weight='weight')
+    else:
+        return nx.degree(graph)
+
+
 def constraint(graph, weight=False):
     """
-    说明
-    :param graph:
-    :return:
+    返回图中所有节点的约束度，以字典表示
     """
     if weight:
         return dict(nx.constraint(graph, weight='weight'))
@@ -14,32 +27,158 @@ def constraint(graph, weight=False):
         return dict(nx.constraint(graph))
 
 
-# 单个节点结构洞有效规模，返回字典
-def effective_size(graph):
-    return dict(nx.effective_size(graph, weight='weight'))
+def effective_size(graph, weight=False):
+    """
+    返回图中所有节点的结构洞有效规模，以字典表示
+    """
+    if weight:
+        return dict(nx.effective_size(graph, weight='weight'))
+    else:
+        return dict(nx.effective_size(graph, weight='weight'))
 
 
-# 单个节点结构洞效率，返回字典
-def efficiency(graph):
-    eff_dict = effective_size(graph)
-    nodes_number = graph.number_of_nodes()
-    for key, value in eff_dict.items():
-        eff_dict[key] = value / nodes_number
+def efficiency(graph, weight=False):
+    """
+    返回图中所有节点的结构洞效率，以字典表示
+    """
+    if weight:
+        eff_dict = effective_size(graph, weight=True)
+        nodes_number = graph.number_of_nodes()
+        for key, value in eff_dict.items():
+            eff_dict[key] = value / nodes_number
+    else:
+        eff_dict = effective_size(graph)
+        nodes_number = graph.number_of_nodes()
+        for key, value in eff_dict.items():
+            eff_dict[key] = value / nodes_number
     return eff_dict
 
 
-# 单个节点聚类系数,返回字典
-def clustering_coefficient(graph):
-    return nx.clustering(graph, weight='weight')
+def grade_degree(graph, weight=False)
+    ans = {}
+    for node in graph.nodes:
+        node_constraint = 0
+        node_local_constraint =[]
+        node_neighber_cnt = 0
+        for node_neighber in set(nx.all_neighbors(graph,node)):
+            if weight:
+                local_constraint = nx.local_constraint(graph, node, node_neighber, weight)
+            else:
+                local_constraint = nx.local_constraint(graph, node, node_neighber)
+            node_constraint +=local_constraint
+            node_local_constraint.append(local_constraint)
+            node_neighber_cnt += 1
+        if node_neighber_cnt == 1:
+            ans[node] = 1
+            continue
+        eff = node_constraint/node_neighber_cnt
+        ans[node] = 0
+        for item in node_local_constraint:
+            ans[node] += (item/eff) * (math.log(item)*eff)
+    return ans
+
+def ego_network_size(graph, weight=False)
+    ans = degree(graph, weight)
+    for key, value in ans.items():
+        ans[key] = value + 1
+    return ans
+def clustering_coefficient(graph, weight='weight'):
+    """
+    返回图中所有节点的聚类系数，以字典表示
+    """
+    if weight:
+        return nx.clustering(graph, weight='weight')
+    else:
+        return nx.clustering(graph)
 
 
-# 整网密度，返回值
+def pagerank(graph, weight=False)
+    if weight:
+        return nx.pagerank(graph, weight='weight')
+    else:
+        return nx.pagerank(graph)
+
+def degree_centrality(graph)
+    """
+    返回图中所有节点的度中心度，以字典表示
+    """
+    return nx.degree_centrality(graph)
+
+
+def between_centrality(graph, weight=False)
+    """
+    返回图中所有节点的中介中心度，以字典表示
+    """
+    if weight:
+        return nx.betweenness_centrality(graph, weight='weight')
+    else:
+        return nx.betweenness_centrality(graph)
+
+
+def closeness_centrality(graph)
+    """
+    返回图中所有节点的接近中心度，以字典表示
+    """
+    return nx.closeness_centrality(graph)
+
+
+def eigenvector_centrality(graph, weight=False)
+    """
+    返回图中所有节点的特征向量中心度，以字典表示
+    """
+    if weight:
+        return nx.eigenvector_centrality(graph, max_iter=5000, weight='weight')
+    else:
+        return nx.eigenvector_centrality(graph, max_iter=5000)
+
+
+def degree_centralization(graph)
+    ans_dict = degree_centrality(graph)
+    value_max = 0
+    value_sum = 0
+    value_cnt = 0
+    for key, value in ans_dict.items():
+        value_sum += value
+        value_max = max(value_max, value)
+        value_cnt += 1
+    return (value_max * value_cnt - value_sum)/(value_cnt - 2)
+
+
+def betweenness_centralization(graph, weight=False)
+    ans_dict = between_centrality(graph, weight=False)
+    value_max = 0
+    value_sum = 0
+    value_cnt = 0
+    for key, value in ans_dict.items():
+        value_sum += value
+        value_max = max(value_max, value)
+        value_cnt += 1
+    return (value_max * value_cnt - value_sum) / (value_cnt - 1)
+
+
+def closeness_centralization(graph)
+    ans_dict = closeness_centrality(graph)
+    value_max = 0
+    value_sum = 0
+    value_cnt = 0
+    for key, value in ans_dict.items():
+        value_sum += value
+        value_max = max(value_max, value)
+        value_cnt += 1
+    return (value_max * value_cnt - value_sum) *(2 * value_cnt -3)/ ((value_cnt - 2) * (value_cnt - 1))
+
+
 def density(graph):
+    """
+    返回图的密度，以数值表示
+    """
     return nx.density(graph)
 
 
-# 整网聚类系数，返回值
 def clustering_global(graph):
+    """
+    返回图的聚类系数，以数值表示
+    """
     return nx.transitivity(graph)
 
 
